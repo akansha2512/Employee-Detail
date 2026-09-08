@@ -11,13 +11,14 @@ import lombok.NoArgsConstructor;
 public class EmployeeDTO {
 
 
-    private Integer empID;
+    private Integer id;
     @NotEmpty
     @Size(min=4, message = "Must be atleast 4 char")
-    private String empName;
+    private String name;
     private Integer age;
     private String department;
     private double salary;
+    private String address;
 
 
 

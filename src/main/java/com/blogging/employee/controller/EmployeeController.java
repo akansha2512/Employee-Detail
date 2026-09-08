@@ -58,5 +58,9 @@ public class EmployeeController {
         return new ResponseEntity<>("Employee Deleted successfuly ", HttpStatus.OK);
     }
 
+    @GetMapping("/getEmplId/{id}")
+    public ResponseEntity<EmployeeDTO> getEmployeeById(@PathVariable Integer id){
+        return ResponseEntity.ok(this.employeeServices.getEmployeeById(id));
+    }
 
 }

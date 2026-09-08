@@ -1,33 +1,38 @@
 package com.blogging.employee.services.impl;
 
+import com.blogging.employee.conversion.EmployeeConversion;
 import com.blogging.employee.dto.EmployeeDTO;
 import com.blogging.employee.entities.Employee;
 import com.blogging.employee.repositiories.EmployeeRepo;
 import com.blogging.employee.services.EmployeeServices;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
+@RequiredArgsConstructor
 @Service
 public class EmployeeServiceImpl implements EmployeeServices {
 
-    @Autowired
-    public EmployeeRepo employeeRepo;
+//    @Autowired
+    public final EmployeeRepo employeeRepo;
+
+    public final EmployeeConversion employeeConversion;
 
     @Override
     public EmployeeDTO createEmployee(EmployeeDTO employeeDTO) {
-        Employee employee = this.dtoToEmployee(employeeDTO);
+        Employee employee = employeeConversion.dtoToEmployee(employeeDTO);
         Employee savedEmployee =this.employeeRepo.save(employee);
-        return this.employeeToDTO(savedEmployee);
+        return employeeConversion.employeeToDTO(savedEmployee);
     }
 
     @Override
     public List<EmployeeDTO> getAllEmployee() {
         List<Employee> employees =this.employeeRepo.findAll();
         List<EmployeeDTO> employeeDTO = employees.stream().map(employee ->
-                this.employeeToDTO(employee)).collect(Collectors.toList());
+                employeeConversion.employeeToDTO(employee)).collect(Collectors.toList());
         return employeeDTO;
     }
 
@@ -36,13 +41,13 @@ public class EmployeeServiceImpl implements EmployeeServices {
         Employee employee = this.employeeRepo.findById(empID).orElseThrow(()->
                 new RuntimeException("EmpID not found"));
 
-        employee.setEmpName(employeeDTO.getEmpName());
+        employee.setName(employeeDTO.getName());
         employee.setAge(employeeDTO.getAge());
         employee.setDepartment(employee.getDepartment());
         employee.setSalary(employeeDTO.getSalary());
-
+        employee.setAddress(employeeDTO.getAddress());
         Employee updateEmployee = this.employeeRepo.save(employee);
-        return this.employeeToDTO(updateEmployee);
+        return employeeConversion.employeeToDTO(updateEmployee);
 
     }
 
@@ -57,26 +62,11 @@ public class EmployeeServiceImpl implements EmployeeServices {
         return null;
     }
 
-
-    public Employee dtoToEmployee(EmployeeDTO employeeDTO){
-        Employee employee = new Employee();
-//        employee.setEmpID(employeeDTO.getEmpID());
-        employee.setEmpName(employeeDTO.getEmpName());
-        employee.setAge(employeeDTO.getAge());
-        employee.setDepartment(employeeDTO.getDepartment());
-        employee.setSalary(employeeDTO.getSalary());
-
-        return employee;
+    @Override
+    public EmployeeDTO getEmployeeById(Integer id) {
+        Employee employee = this.employeeRepo.findById(id).orElseThrow(() -> new RuntimeException("Emp Id is not found"));
+        return employeeConversion.employeeToDTO(employee);
     }
 
-    public EmployeeDTO employeeToDTO(Employee employee){
-        EmployeeDTO employeeDTO = new EmployeeDTO();
-        employeeDTO.setEmpID(employee.getEmpID());
-        employeeDTO.setEmpName(employee.getEmpName());
-        employeeDTO.setAge(employee.getAge());
-        employeeDTO.setDepartment(employee.getDepartment());
-        employeeDTO.setSalary(employee.getSalary());
 
-        return employeeDTO;
-    }
 }

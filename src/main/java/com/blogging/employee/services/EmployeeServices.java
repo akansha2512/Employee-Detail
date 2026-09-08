@@ -17,4 +17,6 @@ public interface EmployeeServices {
     void deleteEmployee(Integer empId);
 
     Employee getAllEmployees();
+
+    EmployeeDTO getEmployeeById(Integer id);
 }
