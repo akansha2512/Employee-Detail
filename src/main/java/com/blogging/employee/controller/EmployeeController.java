@@ -1,14 +1,14 @@
 package com.blogging.employee.controller;
 
-
+import com.blogging.employee.dto.CustomResponse;
 import com.blogging.employee.dto.EmployeeDTO;
-import com.blogging.employee.entities.Employee;
 import com.blogging.employee.services.EmployeeServices;
+import com.blogging.employee.validation.CustomValidation;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,48 +19,118 @@ import java.util.List;
 @RequiredArgsConstructor
 public class EmployeeController {
 
-//    @Autowired
     public final EmployeeServices employeeServices;
-
-//    public EmployeeController(EmployeeServices employeeServices) {
-//        this.employeeServices = employeeServices;
-//    }
+    public final CustomValidation customValidation;
 
     @PostMapping("/create")
-    public ResponseEntity<EmployeeDTO> createEmployee(@RequestBody EmployeeDTO employeeDTO){
-        System.out.println("create api executed");
-        log.info("create api ocntroller is executed");
-        EmployeeDTO create =employeeServices.createEmployee(employeeDTO);
-        return new ResponseEntity<>(create, HttpStatus.CREATED);
+    public CustomResponse<EmployeeDTO> createEmployee(@RequestBody EmployeeDTO employeeDTO) {
+        String validation = customValidation.Validation(employeeDTO);
+
+        if (validation != null) {
+            return new CustomResponse<>(
+                    HttpStatus.BAD_REQUEST.value(),
+                    validation
+            );
+        }
+        EmployeeDTO create = employeeServices.createEmployee(employeeDTO);
+        return new CustomResponse<>(
+                HttpStatus.CREATED.value(),
+                "Employee created successfully",
+                create
+        );
+
+    }
+
+    @PostMapping("/createMultiEmpl")
+    public CustomResponse<List<EmployeeDTO>> createMultiEmpl(@RequestBody List<EmployeeDTO> listEmployeeDTO) {
+
+        for (EmployeeDTO employeeDTO : listEmployeeDTO) {
+            String validation = customValidation.Validation(employeeDTO);
+            if (validation != null) {
+                return new CustomResponse<>(
+                        HttpStatus.BAD_REQUEST.value(),
+                        validation
+                );
+            }
+        }
+
+        List<EmployeeDTO> createEmpl = employeeServices.createMultiEmpl(listEmployeeDTO);
+        return new CustomResponse<>(
+                HttpStatus.CREATED.value(),
+                "Employee created successfully",
+                createEmpl
+        );
     }
 
     @GetMapping("/getAllEmployee")
-    public ResponseEntity<List<EmployeeDTO>> getAllEmployee(){
-        return ResponseEntity.ok(this.employeeServices.getAllEmployee());
+    public CustomResponse<List<EmployeeDTO>> getAllEmployee() {
+        List<EmployeeDTO> employees = employeeServices.getAllEmployee();
+        return new CustomResponse<>(
+                HttpStatus.OK.value(),
+                "Employee fetched Successfully",
+                employees
+        );
     }
 
-//    @GetMapping("/")
-//    public String getAllEmployees(){
-//        Employee emp= employeeServices.getAllEmployees();
-//        return ("list of records printed" +emp);
+
+    @PutMapping("/updateEmployee/{id}")
+    public CustomResponse<EmployeeDTO> updateEmployee(@RequestBody EmployeeDTO employeeDTO, @PathVariable Long id) {
+
+        try{
+            String validation = customValidation.Validation(employeeDTO);
+
+            if (validation != null) {
+                return new CustomResponse<>(
+                        HttpStatus.BAD_REQUEST.value(),
+                        validation
+                );
+            }
+
+            EmployeeDTO update = employeeServices.updateEmployee(employeeDTO, id);
+            return new CustomResponse<EmployeeDTO>(
+                    HttpStatus.OK.value(),
+                    "Employee updated successfully",
+                    update
+            );
+        }catch (RuntimeException e){
+            return new CustomResponse<>(
+                    404,
+                    e.getMessage()
+            );
+        }
+    }
+
+    @DeleteMapping("/deleteEmployee/{id}")
+    public CustomResponse<String> deleteEmployee(@PathVariable Long id) {
+
+       try{
+           employeeServices.deleteEmployee(id);
+           return new CustomResponse<>(HttpStatus.OK.value(), "Employee deleted successfully");
+       }catch (RuntimeException e){
+           return new CustomResponse<>(
+                   404,
+                   e.getMessage()
+           );
+       }
+    }
+
+//    @GetMapping("/getEmplId/{id}")
+//    public EmployeeDTO getEmployeeById(@PathVariable Long id) {
+//        EmployeeDTO employee = employeeServices.getEmployeeById(id);
+//        return employee;
 //    }
+@GetMapping("/getEmplId/{id}")
+public Object getEmployeeById(@PathVariable Long id) {
 
-    @PutMapping("/updateEmployee/{empID}")
-    public ResponseEntity<EmployeeDTO> updateEmployee(@RequestBody EmployeeDTO employeeDTO, @PathVariable Integer empID){
-        EmployeeDTO update = this.employeeServices.updateEmployee(employeeDTO, empID);
-        return ResponseEntity.ok(update);
+    try {
+        return employeeServices.getEmployeeById(id);
 
+    } catch (RuntimeException e) {
+
+        return new CustomResponse<>(
+                404,
+                e.getMessage()
+        );
     }
-
-    @DeleteMapping("/deleteEmployee/{empID}")
-    public ResponseEntity<String> deleteEmployee(@PathVariable Integer empID){
-        this.employeeServices.deleteEmployee(empID);
-        return new ResponseEntity<>("Employee Deleted successfuly ", HttpStatus.OK);
-    }
-
-    @GetMapping("/getEmplId/{id}")
-    public ResponseEntity<EmployeeDTO> getEmployeeById(@PathVariable Integer id){
-        return ResponseEntity.ok(this.employeeServices.getEmployeeById(id));
-    }
-
+}
 }

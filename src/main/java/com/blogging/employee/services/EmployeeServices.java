@@ -10,13 +10,13 @@ public interface EmployeeServices {
 
     EmployeeDTO createEmployee(EmployeeDTO employeeDTO);
 
+    List<EmployeeDTO> createMultiEmpl(List<EmployeeDTO>  employeeDTO);
+
     List<EmployeeDTO> getAllEmployee();
 
-    EmployeeDTO updateEmployee(EmployeeDTO employeeDTO, Integer empID);
+    EmployeeDTO updateEmployee(EmployeeDTO employeeDTO, Long id);
 
-    void deleteEmployee(Integer empId);
+    void deleteEmployee(Long id);
 
-    Employee getAllEmployees();
-
-    EmployeeDTO getEmployeeById(Integer id);
+    EmployeeDTO getEmployeeById(Long id);
 }
