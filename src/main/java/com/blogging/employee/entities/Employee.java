@@ -12,15 +12,13 @@ public class Employee {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
-
+    private Long id;
     @Column(unique = true, length = 100, nullable = false)
     private String name;
     private int age;
     private String department;
     private double salary;
     private String address;
-
-
-
+    @OneToOne(mappedBy = "employee",cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    private EmployeeProfile employeeProfile;
 }

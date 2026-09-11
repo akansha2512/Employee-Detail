@@ -1,2 +1,2 @@
-ALTER TABLE employee_schema.employees
+ALTER TABLE employee.employees
 ADD COLUMN address VARCHAR(255);
